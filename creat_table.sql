@@ -3,7 +3,7 @@ CREATE TABLE Particuliers( IDparticulier number(15) CONSTRAINT pk_particuliers P
 ALTER TABLE Particuliers ADD CONSTRAINT constPartiTel CHECK (length(telephone)=10 OR length(telephone)=12);
 
 
-CREATE OR REPLACE TRIGGER trigPartiTel 
+CREATE TRIGGER trigPartiTel 
 	BEFORE INSERT ON Particuliers
 	FOR EACH ROW
 DECLARE
