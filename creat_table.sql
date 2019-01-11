@@ -3,12 +3,12 @@ CREATE TABLE Particuliers(
 	nom varchar(25),
 	adresse varchar(50),
 	telephone varchar(12),
-CHECK (length(telephone)=10 OR length(telephone)=12)
+CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12)
 );
 
 CREATE TABLE Musees(
 	IDmusee integer CONSTRAINT pkMusee PRIMARY KEY,
-	nom varchar(50) not null,
+	nom varchar(50) not null,--pas chiffres
 	adresse varchar(50) not null,
 	telephone varchar(12),
 	transport number(2),
@@ -16,14 +16,18 @@ CREATE TABLE Musees(
 	temperatureMax number(3),
 	luminositeMax number(6),
 	securite number (2),
-CONSTRAINT checkTel CHECK (length(telephone)=10 OR length(telephone)=12)
+CONSTRAINT checkMuseeTel CHECK (length(telephone)=10 OR length(telephone)=12),
+CONSTRAINT checkMuseeTransport CHECK (transport BETWEEN 0 AND 20),--note sur 20 en fonctin de critères (...)
+CONSTRAINT checkMuseeTempMin CHECK ((temperatureMin < temperatureMax) AND (temperatureMin > 0)),
+CONSTRAINT checkMuseeTempMax CHECK ((temperatureMax > temperatureMin) AND (temperatureMin > 40)),
+CONSTRAINT checkMuseeLuminosite CHECK (luminositeMax BETWEEN 150 AND 130000), --150lux est la limite de luminosité pour lire et 130 000 lux correspond à la luminosité d'une journée ensoleillée d'été
+CONSTRAINT checkSecurite CHECK (securite BETWEEN 0 AND 20)
 );
 
 --contrainte sur le téléphone
 CREATE OR REPLACE FUNCTION fctTel(telephone varchar)
 RETURN varchar IS
---DECLARE
-	tel varchar(10);
+	tel varchar(12);
 	len number(2);
 	chaine varchar(12);
 BEGIN
@@ -46,8 +50,8 @@ BEGIN
 	END IF;
 	
 	FOR i IN 1..len LOOP
-		IF(substr(telephone,i,1) NOT IN ('0','1','2','3','4','5','6','7','8','9'))THEN
-		RAISE_APPLICATION_ERROR(-20011,'Presence de lettre');
+		IF(substr(tel,i,1) NOT IN ('0','1','2','3','4','5','6','7','8','9'))THEN
+			RAISE_APPLICATION_ERROR(-20011,'Presence de lettre');
 		END IF;
 	END LOOP;
 	RETURN tel;
@@ -72,3 +76,25 @@ END;
 
 --Télephone : Nous avons accepter que l'utilisateur puisse utiliser les deux forme les plus courante pour les numéros de télephone à savoir 0 ou +33  suivi d'un chiffre qui n'est pas 0 ou 8 suivi de 8 chiffre. Nous avons aussi décider que dans la table tous les numéros de téléphone seraient de la forme 0185479631.
 --Ils faut donc utiliser le type varchar de taille 10 ou 12 (ALTER TABLE). Pour le reste des constraintes on va utiliser un trigger. Il faut vérifier que le numéro commence soit pas +33 ou par 0 puis qu'il n'est pas suivi de 0 ou 8 et enfin qu'il n'y ait pas de lettre parmi les 10 digits.
+
+	
+-- contrainte sur le nom
+CREATE OR REPLACE PROCEDURE procNom(nom varchar)IS
+	len number(2);
+BEGIN	
+	len:=length(nom);
+	FOR i IN 1..len LOOP
+		IF(substr(nom,i,1) IN ('0','1','2','3','4','5','6','7','8','9'))THEN
+			RAISE_APPLICATION_ERROR(-20012,'Presence de chiffre');
+		END IF;
+	END LOOP;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigMuseeNom 
+	BEFORE INSERT OR UPDATE ON Musees 
+	FOR EACH ROW
+BEGIN
+	procNom(:new.nom);
+END;
+/
