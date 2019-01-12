@@ -1,15 +1,19 @@
 CREATE TABLE Particuliers( 
 	IDparticulier number(15) CONSTRAINT pkParticuliers PRIMARY KEY,
-	nom varchar(25),
-	adresse varchar(50),
+	nom varchar(25) not null,
+	adresse varchar(30),
+	codePostal varchar(5),
+	ville varchar(25),
 	telephone varchar(12),
 CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12)
 );
 
 CREATE TABLE Musees(
 	IDmusee integer CONSTRAINT pkMusee PRIMARY KEY,
-	nom varchar(50) not null,--pas chiffres
-	adresse varchar(50) not null,
+	nom varchar(50) not null,
+	adresse varchar(30) not null,
+	codePostal varchar(5) not null,
+	ville varchar(25) not null,
 	telephone varchar(12),
 	transport number(2),
 	temperatureMin number(3),
@@ -23,6 +27,32 @@ CONSTRAINT checkMuseeTempMax CHECK ((temperatureMax > temperatureMin) AND (tempe
 CONSTRAINT checkMuseeLuminosite CHECK (luminositeMax BETWEEN 150 AND 130000), --150lux est la limite de luminosité pour lire et 130 000 lux correspond à la luminosité d'une journée ensoleillée d'été
 CONSTRAINT checkSecurite CHECK (securite BETWEEN 0 AND 20)
 );
+
+--vérification ne contient que des lettres
+CREATE OR REPLACE PROCEDURE verifLettre(mot varchar)IS
+	len number(2);
+BEGIN	
+	len:=length(mot);
+	FOR i IN 1..len LOOP
+		IF(substr(mot,i,1) IN ('0','1','2','3','4','5','6','7','8','9'))THEN
+			RAISE_APPLICATION_ERROR(-20012,'Presence de chiffre');
+		END IF;
+	END LOOP;
+END;
+/
+
+--vérification ne contient que des chiffres
+CREATE OR REPLACE PROCEDURE verifChiffre(nombre varchar)IS
+	len number(2);
+BEGIN	
+	len:=length(nombre);
+	FOR i IN 1..len LOOP
+		IF(substr(nombre,i,1) NOT IN ('0','1','2','3','4','5','6','7','8','9'))THEN
+			RAISE_APPLICATION_ERROR(-20011,'Presence de lettre');
+		END IF;
+	END LOOP;
+END;
+/
 
 --contrainte sur le téléphone
 CREATE OR REPLACE FUNCTION fctTel(telephone varchar)
@@ -49,11 +79,8 @@ BEGIN
 		tel:=chaine;
 	END IF;
 	
-	FOR i IN 1..len LOOP
-		IF(substr(tel,i,1) NOT IN ('0','1','2','3','4','5','6','7','8','9'))THEN
-			RAISE_APPLICATION_ERROR(-20011,'Presence de lettre');
-		END IF;
-	END LOOP;
+	verifChiffre(tel);
+
 	RETURN tel;
 END;
 /
@@ -79,22 +106,10 @@ END;
 
 	
 -- contrainte sur le nom
-CREATE OR REPLACE PROCEDURE procNom(nom varchar)IS
-	len number(2);
-BEGIN	
-	len:=length(nom);
-	FOR i IN 1..len LOOP
-		IF(substr(nom,i,1) IN ('0','1','2','3','4','5','6','7','8','9'))THEN
-			RAISE_APPLICATION_ERROR(-20012,'Presence de chiffre');
-		END IF;
-	END LOOP;
-END;
-/
-
 CREATE OR REPLACE TRIGGER trigMuseeNom 
 	BEFORE INSERT OR UPDATE ON Musees 
 	FOR EACH ROW
 BEGIN
-	procNom(:new.nom);
+	verifLettre(:new.nom);
 END;
 /
