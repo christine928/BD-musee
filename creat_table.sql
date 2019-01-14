@@ -8,18 +8,6 @@ CREATE TABLE Particuliers(
 CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null)
 );
 
-CREATE TABLE Employes (
-	IDemploye integer CONSTRAINT pkEmployes PRIMARY KEY, 
-	IDmusee integer CONSTRAINT fkMusees REFERENCES Musees(IDmusee) not null, 
-	IDchef integer CONSTRAINT fkEmployes REFERENCES Employes(IDemploye),
-	fonction varchar(20) not null,
-	salaire float not null,
-	nom varchar(25),
-	adresse varchar(50) not null,
-	codePostal varchar(5) not null,
-	ville varchar(25),
-CONSTRAINT chekEmployesSalaire CHECK (salaire >= 0) );
-
 
 CREATE TABLE Musees(
 	IDmusee integer CONSTRAINT pkMusee PRIMARY KEY,
@@ -36,9 +24,47 @@ CREATE TABLE Musees(
 CONSTRAINT checkMuseeTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null),
 CONSTRAINT checkMuseeTransport CHECK (transport BETWEEN 0 AND 20),--note sur 20 en fonctin de critères (...)
 CONSTRAINT checkMuseeTempMin CHECK ((temperatureMin < temperatureMax) AND (temperatureMin > 0)),
-CONSTRAINT checkMuseeTempMax CHECK ((temperatureMax > temperatureMin) AND (temperatureMin > 40)),
+CONSTRAINT checkMuseeTempMax CHECK ((temperatureMax > temperatureMin) AND (temperatureMax < 40)),
 CONSTRAINT checkMuseeLuminosite CHECK (luminositeMax BETWEEN 150 AND 130000), --150lux est la limite de luminosité pour lire et 130 000 lux correspond à la luminosité d'une journée ensoleillée d'été
 CONSTRAINT checkSecurite CHECK (securite BETWEEN 0 AND 20)
+);
+
+CREATE TABLE Employes (
+	IDemploye integer CONSTRAINT pkEmployes PRIMARY KEY, 
+	IDmusee integer CONSTRAINT fkMusees REFERENCES Musees(IDmusee) not null, 
+	IDchef integer CONSTRAINT fkEmployes REFERENCES Employes(IDemploye),
+	fonction varchar(20) not null,
+	salaire float not null,
+	nom varchar(25),
+	adresse varchar(50) not null,
+	codePostal varchar(5) not null,
+	ville varchar(25),
+CONSTRAINT chekEmployesSalaire CHECK (salaire >= 0) );
+
+CREATE TABLE oeuvres (
+	IDoeuvre integer CONSTRAINT pkOeuvre PRIMARY KEY not null,
+	IDappartient integer not null,
+	source number(1) CONSTRAINT constOeuvreBoolean CHECK (source in (0, 1)) not null,
+	poids number(5,2) CONSTRAINT constOeuvrePoids CHECK (poids >=0)not null, 
+	unitePoids varchar(2) CONSTRAINT constOeuvreUnitePoids CHECK (unitePoids in ('t', 'kg', 'g', 'mg'))not null,
+	largeur number(5,2) CONSTRAINT constOeuvrelarg CHECK (largeur>0)not null,
+	longueur number(5,2) CONSTRAINT constOeuvrelong CHECK (longueur>0)not null, 
+	hauteur number(5,2) CONSTRAINT constOeuvrehaut CHECK (hauteur>0) not null, 
+	temperatureMin number(3) CONSTRAINT constOeuvreTempMin CHECK (temperatureMin>0)not null,
+	temperatureMax number(3) CONSTRAINT constOeuvreTempMax CHECK (temperatureMax<40) not null,
+	luminositeMax number(6) CONSTRAINT constOeuvreLum CHECK (luminositeMax BETWEEN 150 AND 130000)not null,
+	securite number(2) not null,
+	fragilite number(3) not null,
+	type char(15) CONSTRAINT constOeuvreType CHECK (type IN ('peinture', 'sculpture', 'manuscrit', 'outils', 'autres')),
+	nom varchar(50),
+	artiste varchar(25),
+	dateCreationDebut date,
+	dateCreationFin date,
+	theme varchar(20),
+	mouvement varchar(20),
+	valeur float CONSTRAINT constOeuvrePrix CHECK (valeur>=0) not null,-- vaut -1 si inestimable
+CONSTRAINT constOeuvretempMaxSuppMin CHECK (temperatureMax>temperatureMin),
+CONSTRAINT constOeuvreDate CHECK(dateCreationDebut<=dateCreationFin)
 );
 
 --vérification ne contient que des lettres
@@ -92,8 +118,10 @@ BEGIN
 		chaine:=lpad(chaine,10,0); --ajoute 0 au début de la chaîne qui fera alors 10 caractères
 		tel:=chaine;
 	END IF;
-	
-	verifChiffre(tel);
+
+	IF (telephone is not null) THEN
+		verifChiffre(tel);
+	END IF;
 
 	RETURN tel;
 END;
@@ -125,5 +153,43 @@ CREATE OR REPLACE TRIGGER trigMuseeNom
 	FOR EACH ROW
 BEGIN
 	verifLettre(:new.nom);
+END;
+/
+
+CREATE OR REPLACE TRIGGER  trigOeuvreAppartient BEFORE INSERT OR UPDATE ON oeuvres
+FOR EACH ROW
+DECLARE
+	ok number(1):=0; --vaut 1 si on doit lever une exception due au musee, 2 pour une exception due au pparticulier, 0 sinon
+	nbreParticulier integer:=0;
+	nbreMusee integer:=0;
+BEGIN
+	SELECT count(*) INTO nbreParticulier
+		FROM Particuliers
+		WHERE Particuliers.IdParticulier = :new.Idappartient;
+	
+	SELECT count(*) INTO nbreMusee
+		FROM Musees
+		WHERE IdMusee = :new.Idappartient;
+		
+	IF((:new.source=0) AND (nbreParticulier=0)) THEN
+		ok:=2;
+	ELSIF((:new.source=1) AND (nbreMusee=0)) THEN
+		ok:=1;
+	END IF;
+
+	IF(ok=1) THEN
+		RAISE_APPLICATION_ERROR(-20005, 'cet identifiant de musee n existe pas');
+	ELSIF(ok=2) THEN 
+		RAISE_APPLICATION_ERROR(-20006, 'cet identifiant de particulier n existe pas');
+	END IF;
+END;
+/ 
+
+CREATE OR REPLACE TRIGGER trigOeuvreDate BEFORE INSERT OR UPDATE ON Oeuvres
+FOR EACH ROW
+BEGIN
+	IF((:new.dateCreationDebut>sysdate)OR(:new.dateCreationFin>sysdate)) THEN
+		RAISE_APPLICATION_ERROR(-20007, 'la date de creation ne peut etre superieure a aujourd hui');
+	END IF;
 END;
 /
