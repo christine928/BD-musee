@@ -1,17 +1,30 @@
 CREATE TABLE Particuliers( 
 	IDparticulier number(15) CONSTRAINT pkParticuliers PRIMARY KEY,
 	nom varchar(25) not null,
-	adresse varchar(30),
-	codePostal varchar(5),
+	adresse varchar(50) not null,
+	codePostal varchar(5) not null,
 	ville varchar(25),
 	telephone varchar(12),
-CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12)
+CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null)
 );
+
+CREATE TABLE Employes (
+	IDemploye integer CONSTRAINT pkEmployes PRIMARY KEY, 
+	IDmusee integer CONSTRAINT fkMusees REFERENCES Musees(IDmusee) not null, 
+	IDchef integer CONSTRAINT fkEmployes REFERENCES Employes(IDemploye),
+	fonction varchar(20) not null,
+	salaire float not null,
+	nom varchar(25),
+	adresse varchar(50) not null,
+	codePostal varchar(5) not null,
+	ville varchar(25),
+CONSTRAINT chekEmployesSalaire CHECK (salaire >= 0) );
+
 
 CREATE TABLE Musees(
 	IDmusee integer CONSTRAINT pkMusee PRIMARY KEY,
 	nom varchar(50) not null,
-	adresse varchar(30) not null,
+	adresse varchar(50) not null,
 	codePostal varchar(5) not null,
 	ville varchar(25) not null,
 	telephone varchar(12),
@@ -20,7 +33,7 @@ CREATE TABLE Musees(
 	temperatureMax number(3),
 	luminositeMax number(6),
 	securite number (2),
-CONSTRAINT checkMuseeTel CHECK (length(telephone)=10 OR length(telephone)=12),
+CONSTRAINT checkMuseeTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null),
 CONSTRAINT checkMuseeTransport CHECK (transport BETWEEN 0 AND 20),--note sur 20 en fonctin de critères (...)
 CONSTRAINT checkMuseeTempMin CHECK ((temperatureMin < temperatureMax) AND (temperatureMin > 0)),
 CONSTRAINT checkMuseeTempMax CHECK ((temperatureMax > temperatureMin) AND (temperatureMin > 40)),
@@ -61,6 +74,7 @@ RETURN varchar IS
 	len number(2);
 	chaine varchar(12);
 BEGIN
+	
 	len:=length(telephone);
 	tel:=telephone;
 	IF( (len = 10) AND ( 
