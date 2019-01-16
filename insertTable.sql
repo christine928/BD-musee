@@ -1,10 +1,18 @@
 --tarifs (IDtarif, cible, prix)
 INSERT INTO Tarifs VALUES (1,'-26 ans',0);
-INSERT INTO Tarifs VALUES (2,'groupes',25.50);
-INSERT INTO Tarifs VALUES (3,'normal',5.50);
-INSERT INTO Tarifs VALUES (4,'séniors',3.50);
-INSERT INTO Tarifs VALUES (5,'handicapes',1.50);
-INSERT INTO Tarifs VALUES (6,'chomeurs',2.50);
+INSERT INTO Tarifs VALUES (2,'groupes 20',2.50);
+INSERT INTO Tarifs VALUES (3,'groupes 50',1.00);
+INSERT INTO Tarifs VALUES (4,'normal',5.50);
+INSERT INTO Tarifs VALUES (5,'séniors',3.50);
+INSERT INTO Tarifs VALUES (6,'handicapes',1.50);
+INSERT INTO Tarifs VALUES (7,'chomeurs',2.50);
+INSERT INTO Tarifs VALUES (8,'enseignants',2.50);
+INSERT INTO Tarifs VALUES (9,'gratuit groupes',0);
+INSERT INTO Tarifs VALUES (10,'gratuit normal',0);
+INSERT INTO Tarifs VALUES (11,'gratuit séniors',0);
+INSERT INTO Tarifs VALUES (12,'gratuit handicapes',0);
+INSERT INTO Tarifs VALUES (13,'gratuit chomeurs',0);
+INSERT INTO Tarifs VALUES (14,'gratuit enseignant',0);
 
 --musees (IDmusee, nom, adresse, telephone, transport, tempMin, tempMax, lumMax, secu)
 INSERT INTO Musees VALUES (1, 'Louvre', 'Rue de Rivoli','75001','Paris','0140205050',20,1,10,130000,20);
@@ -17,8 +25,8 @@ INSERT INTO Musees VALUES (7,'Musee de la chemiserie et de l`elegance masculine'
 INSERT INTO Musees VALUES (10000000000000000000,'Musee de la chemiserie et de l`elegance masculine','Rue Charles Brillaud','36200','Argenton-sur-Creuse','0254243469',14,16,30,85000,14);
 
 --vendTickets (IDticket, IDtarif, IDmusee, dateVente, dateVisite, codePostal)
-INSERT INTO VendTickets VALUES (1,2,1,TO_DATE('2019/01/14', 'yyyy/mm/dd'),TO_DATE('2019/01/14', 'yyyy/mm/dd'),92500);
-INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('2019/01/14', 'yyyy/mm/dd'),TO_DATE('2019/01/15', 'yyyy/mm/dd'),75001);
+INSERT INTO VendTickets VALUES (1,2,1,TO_DATE('2019/01/16', 'yyyy/mm/dd'),TO_DATE('2019/01/16', 'yyyy/mm/dd'),92500);
+INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('2019/01/16', 'yyyy/mm/dd'),TO_DATE('2019/02/15', 'yyyy/mm/dd'),75001);
 
 --particuliers (IDparticulier, nom, adresse, codePostal, ville, telephone)
 insert into particuliers values (1, 'lfdn', 'enfers', '66666', 'Hell', '0666666666');

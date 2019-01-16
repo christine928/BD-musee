@@ -11,6 +11,7 @@ drop trigger trigMuseeNom;
 drop trigger trigOeuvreAppartient;
 drop trigger trigVenteCodePostal;
 drop trigger trigVenteDate;
+drop trigger trigOeuvreDate;
 drop table Emprunte;
 drop table Oeuvres;
 drop table Employes;
@@ -18,4 +19,5 @@ drop table VendTickets;
 drop table Tarifs;
 drop table Musees;
 drop table Particuliers;
+
 
