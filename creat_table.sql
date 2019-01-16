@@ -5,7 +5,8 @@ CREATE TABLE Particuliers(
 	codePostal varchar(5) not null,
 	ville varchar(25),
 	telephone varchar(12),
-CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null)
+CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null),
+CONSTRAINT checkPartiCodePostal CHECK (length(codePostal)=5)
 );
 
 CREATE TABLE Tarifs( 
@@ -28,6 +29,7 @@ CREATE TABLE Musees(
 	luminositeMax number(6),
 	securite number (2),
 CONSTRAINT checkMuseeTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null),
+CONSTRAINT checkMuseeCodePostal CHECK (length(codePostal)=5),
 CONSTRAINT checkMuseeTransport CHECK (transport BETWEEN 0 AND 20),--note sur 20 en fonctin de critères (...)
 CONSTRAINT checkMuseeTempMin CHECK ((temperatureMin < temperatureMax) AND (temperatureMin > 0)),
 CONSTRAINT checkMuseeTempMax CHECK ((temperatureMax > temperatureMin) AND (temperatureMax < 40)),
@@ -56,7 +58,8 @@ CREATE TABLE Employes (
 	adresse varchar(50) not null,
 	codePostal varchar(5) not null,
 	ville varchar(25),
-CONSTRAINT checkEmployesSalaire CHECK (salaire >= 0) );
+CONSTRAINT checkEmployesSalaire CHECK (salaire >= 0),
+CONSTRAINT checkEmplyesCodePostal CHECK (length(codePostal)=5) );
 
 CREATE TABLE Oeuvres (
 	IDoeuvre integer CONSTRAINT pkOeuvre PRIMARY KEY not null,
@@ -180,7 +183,7 @@ BEGIN
 END;
 /
 
-CREATE OR REPLACE TRIGGER trigEmpruntemuseeActif BEFORE INSERT OR UPDATE ON Emprunte
+CREATE OR REPLACE TRIGGER trigEmprunteMuseeActif BEFORE INSERT OR UPDATE ON Emprunte
 FOR EACH ROW
 DECLARE
 	ok number :=0;
@@ -248,6 +251,7 @@ BEGIN
 END;
 /
 
+-- verification des numéros de telephone
 CREATE OR REPLACE TRIGGER trigPartiTel 
 	BEFORE INSERT OR UPDATE ON Particuliers 
 	FOR EACH ROW
@@ -269,8 +273,35 @@ END;
 
 	
 -- contrainte sur le nom
+CREATE OR REPLACE TRIGGER trigPartiNom 
+	BEFORE INSERT OR UPDATE ON Particuliers 
+	FOR EACH ROW
+BEGIN
+	verifLettre(:new.nom);
+	verifLettre(:new.ville);
+END;
+/
+
 CREATE OR REPLACE TRIGGER trigMuseeNom 
 	BEFORE INSERT OR UPDATE ON Musees 
+	FOR EACH ROW
+BEGIN
+	verifLettre(:new.nom);
+	verifLettre(:new.ville);
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigEmployeNom 
+	BEFORE INSERT OR UPDATE ON Employes 
+	FOR EACH ROW
+BEGIN
+	verifLettre(:new.nom);
+	verifLettre(:new.ville);
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigOeuvreNom 
+	BEFORE INSERT OR UPDATE ON Oeuvres 
 	FOR EACH ROW
 BEGIN
 	verifLettre(:new.nom);
@@ -278,6 +309,22 @@ END;
 /
 
 -- contrainte sur le code postal
+CREATE OR REPLACE TRIGGER trigPartiCodePostal 
+	BEFORE INSERT OR UPDATE ON Particuliers 
+	FOR EACH ROW
+BEGIN
+	verifChiffre(:new.codePostal);
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigMuseeCodePostal 
+	BEFORE INSERT OR UPDATE ON Musees 
+	FOR EACH ROW
+BEGIN
+	verifChiffre(:new.codePostal);
+END;
+/
+
 CREATE OR REPLACE TRIGGER trigVenteCodePostal 
 	BEFORE INSERT OR UPDATE ON VendTickets 
 	FOR EACH ROW
@@ -286,10 +333,39 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE TRIGGER trigEmpoyeCodePostal 
+	BEFORE INSERT OR UPDATE ON Employes 
+	FOR EACH ROW
+BEGIN
+	verifChiffre(:new.codePostal);
+END;
+/
+
+-- contrainte sur le transport d'une oeuvre vers un musee
+CREATE OR REPLACE TRIGGER trigTransport 
+	BEFORE INSERT OR UPDATE ON Emprunte 
+	FOR EACH ROW
+DECLARE
+	ok integer := 0;
+BEGIN
+	SELECT count(*) INTO ok
+		FROM Musees, Oeuvres
+		WHERE Musees.IDmusee = :new.IDmusee
+			AND Oeuvres.IDoeuvre = :new.IDoeuvre
+			AND Oeuvres.luminositeMax <= Musees.luminositeMax
+			AND Oeuvres.securite <= Musees.securite
+			AND Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax
+			OR Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax;
+	IF (ok = 0) THEN
+		RAISE_APPLICATION_ERROR(-20004, 'les conditions de stockage ou de transport de l oeuvre pour ce musee ne sont pas compatibles');
+	END IF;
+END;
+/
+
 CREATE OR REPLACE TRIGGER  trigOeuvreAppartient BEFORE INSERT OR UPDATE ON oeuvres
 FOR EACH ROW
 DECLARE
-	ok number(1):=0; --vaut 1 si on doit lever une exception due au musee, 2 pour une exception due au pparticulier, 0 sinon
+	ok number(1):=0; --vaut 1 si on doit lever une exception due au musee, 2 pour une exception due au particulier, 0 sinon
 	nbreParticulier integer:=0;
 	nbreMusee integer:=0;
 BEGIN
@@ -318,7 +394,7 @@ END;
 CREATE OR REPLACE TRIGGER trigOeuvreDate BEFORE INSERT OR UPDATE ON Oeuvres
 FOR EACH ROW
 BEGIN
-	IF((:new.dateCreationDebut>sysdate)OR(:new.dateCreationFin>sysdate)) THEN
+	IF(:new.dateCreationFin>sysdate) THEN
 		RAISE_APPLICATION_ERROR(-20007, 'la date de creation ne peut etre superieure a aujourd hui');
 	END IF;
 END;
