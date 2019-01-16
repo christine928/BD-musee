@@ -79,9 +79,19 @@ CREATE TABLE Oeuvres (
 	dateCreationFin date,
 	theme varchar(20),
 	mouvement varchar(20),
-	valeur float CONSTRAINT constOeuvrePrix CHECK (valeur>=0) not null,-- vaut -1 si inestimable
+	valeur float CONSTRAINT constOeuvrePrix CHECK (valeur=-1 OR valeur>0) not null,-- vaut -1 si inestimable
 CONSTRAINT constOeuvretempMaxSuppMin CHECK (temperatureMax>temperatureMin),
 CONSTRAINT constOeuvreDate CHECK(dateCreationDebut<=dateCreationFin)
+);
+
+CREATE TABLE Emprunte(
+	IDoeuvre integer REFERENCES Oeuvres(IDoeuvre) not null,
+	IDmusee integer REFERENCES Musees(IDmusee) not null,
+	dateEmprunt date not null,
+	dateRetour date not null,
+	prix number(14, 2) CONSTRAINT constEmpruntePrix CHECK (prix>=0),
+	CONSTRAINT constEmprunteDate CHECK (DateRetour>DateEmprunt),
+	CONSTRAINT pkemprunte PRIMARY KEY (IDoeuvre, IDmusee, dateEmprunt)
 );
 
 --vérification ne contient que des lettres
@@ -151,6 +161,82 @@ BEGIN
 	END IF;
 
 	RETURN tel;
+END;
+/
+
+--verifie si le musee est actif
+CREATE OR REPLACE FUNCTION fctMuseeActif (idmuseeAVerif integer)
+return number IS
+	tel varchar(12);
+	ok number :=0;
+BEGIN
+	select telephone INTO tel
+		from musees
+		where idmusee=idmuseeAVerif;
+	IF (tel is null) THEN
+		ok:=1;
+	END IF;
+	RETURN ok;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigEmpruntemuseeActif BEFORE INSERT OR UPDATE ON Emprunte
+FOR EACH ROW
+DECLARE
+	ok number :=0;
+BEGIN
+	ok:=fctMuseeActif(:new.IDmusee);
+	IF(ok=1) THEN
+		RAISE_APPLICATION_ERROR(-20007, 'ce musee n est pas actif');
+	END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigEmprunteUneOeuvre BEFORE INSERT OR UPDATE ON Emprunte
+FOR EACH ROW
+DECLARE
+	nbre integer;
+	IDmuseeAppartient integer;
+	sourceAppartient number(1);
+	valeurOeuvre float;
+BEGIN
+
+	SELECT Oeuvres.valeur INTO valeurOeuvre
+		FROM Oeuvres WHERE Oeuvres.idoeuvre=:new.idOeuvre;
+
+	--verification que l oeuvre est empruntable (donc pas inestimable)
+	IF(valeurOeuvre=-1) THEN ---1 correspond a une oeuvre inestimable
+		RAISE_APPLICATION_ERROR(-20021, 'cette oeuvre n est pas empruntable');
+	END IF;
+	
+	--verification que le prix d emprunt et inferieur a la valeur de l oeuvre
+	IF(valeurOeuvre<=:new.prix) THEN
+		RAISE_APPLICATION_ERROR(-20013, 'tu ne peux pas emprunter une oeuvre pour un prix superieur ou egal a sa valeur.');
+	END IF;
+
+	--verification que l emprunt commence aujourd hui, ca se fera avec la fonction de lea;) des qu elle sera ok
+	IF (:new.dateEmprunt != to_date(sysdate, 'DD-MON-YY')) THEN
+		RAISE_APPLICATION_ERROR(-60009, 'Tu ne peux pas prevoir d emprunter une oeuvre. Il faut donc mettre la date d aujourd hui comme date d emprunt');
+	END IF;
+	
+	--verification que le musee ne s emprunte pas a lui meme
+	SELECT IDappartient, source INTO IDmuseeAppartient, sourceAppartient
+		FROM Oeuvres WHERE :new.IDOeuvre=Oeuvres.IDOeuvre;
+
+	IF ((sourceAppartient=1) AND (IDmuseeAppartient=:new.IDmusee)) THEN
+		RAISE_APPLICATION_ERROR(-20020, 'tu ne peux pas t emprunter a toi meme');
+	END IF;
+
+	--verification que l'oeuvre n est pas deja empruntee
+	SELECT count(*)  INTO nbre FROM emprunte 
+		WHERE :new.IDoeuvre=emprunte.IDOeuvre AND dateretour>:new.dateEmprunt;
+
+	IF(nbre>1) THEN
+		RAISE_APPLICATION_ERROR(-20011, 'Il y a plus de 1 date de retour prevue pour une oeuvre, ce qui est theoriquement impossible');
+	ELSIF (nbre=1) THEN
+		RAISE_APPLICATION_ERROR(-20012, 'Cette oeuvre est encore en cours d emprunt, et ne peut donc etre empruntee.');
+	END IF;
+
 END;
 /
 
