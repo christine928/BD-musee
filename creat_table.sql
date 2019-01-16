@@ -98,72 +98,70 @@ CREATE TABLE Emprunte(
 );
 
 --vérification ne contient que des lettres
-CREATE OR REPLACE PROCEDURE verifLettre(mot varchar)IS
+
+CREATE OR REPLACE FUNCTION verifLettre(mot varchar)
+RETURN number IS
 	len number(2);
 BEGIN	
 	len:=length(mot);
 	FOR i IN 1..len LOOP
 		IF(substr(mot,i,1) IN ('0','1','2','3','4','5','6','7','8','9'))THEN
-			RAISE_APPLICATION_ERROR(-20012,'Presence de chiffre');
+			RETURN 1;
 		END IF;
 	END LOOP;
+	RETURN 0;
 END;
 /
 
 --vérification ne contient que des chiffres
-CREATE OR REPLACE PROCEDURE verifChiffre(nombre varchar)IS
+CREATE OR REPLACE FUNCTION verifChiffre(nombre varchar)
+RETURN number IS
 	len number(2);
 BEGIN	
-	len:=length(nombre);
+	len:=length(nombre);		
 	FOR i IN 1..len LOOP
 		IF(substr(nombre,i,1) NOT IN ('0','1','2','3','4','5','6','7','8','9'))THEN
-			RAISE_APPLICATION_ERROR(-20011,'Presence de lettre');
+			RETURN 1;
 		END IF;
 	END LOOP;
+	RETURN 0;
 END;
 /
 
 --vérifie si la date entrée est la date du jour
-CREATE OR REPLACE PROCEDURE verifDate(newDate date)IS
+CREATE OR REPLACE FUNCTION verifDate(newDate date)
+RETURN number IS
 BEGIN	
 	IF(newDate = TO_DATE(SYSDATE, 'yyyy/mm/dd'))THEN --sysdate prend aussi en compte l'heure exacte ce que nous ne voulons pas alors on compare sur la journée entière
-    		RAISE_APPLICATION_ERROR( -20010,'la date ne vaut pas la date actuelle :current date - value = ' || 
-          to_char( SYSDATE, 'YYYY-MM-DD' ));
+		RETURN 1;
+
   	END IF;
+	RETURN 0;
 END;
 /
 
 --contrainte sur le téléphone
-CREATE OR REPLACE FUNCTION fctTel(telephone varchar)
-RETURN varchar IS
-	tel varchar(12);
+CREATE  OR REPLACE FUNCTION fctTel(telephone varchar)
+RETURN number IS
 	len number(2);
-	chaine varchar(12);
 BEGIN
 	
 	len:=length(telephone);
-	tel:=telephone;
 	IF( (len = 10) AND ( 
 	(substr(telephone,1,1) <> '0')OR --garde la partie de chaîne de la position 1 sur une longueur de 1
 	(substr(telephone,2,1) IN ('0','8'))))THEN
-		RAISE_APPLICATION_ERROR(-20009,'numero telephone incorrect');
+		RETURN 1;
 	ELSIF( (len = 12) AND (
 	(substr(telephone,1,3) <> '+33')OR 
 	(substr(telephone,4,1) IN ('0','8'))))THEN
-		RAISE_APPLICATION_ERROR(-20009,'numero telephone incorrect');
-	END IF;
-	
-	IF (len = 12) THEN
-		chaine:=substr(telephone,4);
-		chaine:=lpad(chaine,10,0); --ajoute 0 au début de la chaîne qui fera alors 10 caractères
-		tel:=chaine;
+		RETURN 1;
 	END IF;
 
 	IF (telephone is not null) THEN
-		verifChiffre(tel);
+		RETURN verifChiffre(telephone);
 	END IF;
 
-	RETURN tel;
+	RETURN 0;
 END;
 /
 
@@ -171,32 +169,30 @@ END;
 CREATE OR REPLACE FUNCTION fctMuseeActif (idmuseeAVerif integer)
 return number IS
 	tel varchar(12);
-	ok number :=0;
 BEGIN
 	select telephone INTO tel
 		from musees
 		where idmusee=idmuseeAVerif;
 	IF (tel is null) THEN
-		ok:=1;
+		RETURN 1;
 	END IF;
-	RETURN ok;
+	RETURN 0;
 END;
 /
 
-CREATE OR REPLACE TRIGGER trigEmprunteMuseeActif BEFORE INSERT OR UPDATE ON Emprunte
-FOR EACH ROW
-DECLARE
-	ok number :=0;
+CREATE OR REPLACE TRIGGER trigEmprunteMuseeActif 
+	BEFORE INSERT OR UPDATE ON Emprunte
+	FOR EACH ROW
 BEGIN
-	ok:=fctMuseeActif(:new.IDmusee);
-	IF(ok=1) THEN
+	IF (fctMuseeActif(:new.IDmusee)=1) THEN
 		RAISE_APPLICATION_ERROR(-20007, 'ce musee n est pas actif');
 	END IF;
 END;
 /
 
-CREATE OR REPLACE TRIGGER trigEmprunteUneOeuvre BEFORE INSERT OR UPDATE ON Emprunte
-FOR EACH ROW
+CREATE OR REPLACE TRIGGER trigEmprunteUneOeuvre 
+	BEFORE INSERT OR UPDATE ON Emprunte
+	FOR EACH ROW
 DECLARE
 	nbre integer;
 	IDmuseeAppartient integer;
@@ -244,10 +240,13 @@ END;
 /
 
 CREATE OR REPLACE TRIGGER trigVenteDate
-  BEFORE INSERT OR UPDATE ON VendTickets
-  FOR EACH ROW
+	BEFORE INSERT OR UPDATE ON VendTickets
+	FOR EACH ROW
 BEGIN
-	verifDate(:new.dateVente);
+	IF (verifDate(:new.dateVente)=1) then
+		RAISE_APPLICATION_ERROR( -20010,'la date ne vaut pas la date actuelle :current date - value = ' || 
+          to_char( SYSDATE, 'YYYY-MM-DD' ));
+	END IF;
 END;
 /
 
@@ -255,8 +254,11 @@ END;
 CREATE OR REPLACE TRIGGER trigPartiTel 
 	BEFORE INSERT OR UPDATE ON Particuliers 
 	FOR EACH ROW
+
 BEGIN
-	:new.telephone := fctTel(:new.telephone);
+	IF (fctTel(:new.telephone)=1) THEN
+		RAISE_APPLICATION_ERROR(-20009,'numero telephone incorrect');
+	END IF;
 END;
 /
 
@@ -264,7 +266,9 @@ CREATE OR REPLACE TRIGGER trigMuseeTel
 	BEFORE INSERT OR UPDATE ON Musees 
 	FOR EACH ROW
 BEGIN
-	:new.telephone := fctTel(:new.telephone);
+	IF (fctTel(:new.telephone)=1) THEN
+		RAISE_APPLICATION_ERROR(-20009,'numero telephone incorrect');
+	END IF;
 END;
 /
 
@@ -276,9 +280,14 @@ END;
 CREATE OR REPLACE TRIGGER trigPartiNom 
 	BEFORE INSERT OR UPDATE ON Particuliers 
 	FOR EACH ROW
+
 BEGIN
-	verifLettre(:new.nom);
-	verifLettre(:new.ville);
+	IF(verifLettre(:new.nom)=1) THEN 
+		RAISE_APPLICATION_ERROR(-20017,'presence chiffre dans nom');
+	END IF;
+	IF (verifLettre(:new.ville)=1) THEN
+		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	END IF;
 END;
 /
 
@@ -286,8 +295,12 @@ CREATE OR REPLACE TRIGGER trigMuseeNom
 	BEFORE INSERT OR UPDATE ON Musees 
 	FOR EACH ROW
 BEGIN
-	verifLettre(:new.nom);
-	verifLettre(:new.ville);
+	IF(verifLettre(:new.nom)=1) THEN 
+		RAISE_APPLICATION_ERROR(-20017,'presence chiffre dans nom');
+	END IF;
+	IF (verifLettre(:new.ville)=1) THEN
+		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	END IF;
 END;
 /
 
@@ -295,8 +308,12 @@ CREATE OR REPLACE TRIGGER trigEmployeNom
 	BEFORE INSERT OR UPDATE ON Employes 
 	FOR EACH ROW
 BEGIN
-	verifLettre(:new.nom);
-	verifLettre(:new.ville);
+	IF(verifLettre(:new.nom)=1) THEN 
+		RAISE_APPLICATION_ERROR(-20017,'presence chiffre dans nom');
+	END IF;
+	IF (verifLettre(:new.ville)=1) THEN
+		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	END IF;
 END;
 /
 
@@ -304,7 +321,9 @@ CREATE OR REPLACE TRIGGER trigOeuvreNom
 	BEFORE INSERT OR UPDATE ON Oeuvres 
 	FOR EACH ROW
 BEGIN
-	verifLettre(:new.nom);
+	IF (verifLettre(:new.nom)=1) THEN
+		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	END IF;
 END;
 /
 
@@ -313,7 +332,9 @@ CREATE OR REPLACE TRIGGER trigPartiCodePostal
 	BEFORE INSERT OR UPDATE ON Particuliers 
 	FOR EACH ROW
 BEGIN
-	verifChiffre(:new.codePostal);
+	IF (verifChiffre(:new.codePostal)=1) THEN
+		RAISE_APPLICATION_ERROR(-20019, 'presence lettre dans code postal');
+	END IF;
 END;
 /
 
@@ -321,7 +342,9 @@ CREATE OR REPLACE TRIGGER trigMuseeCodePostal
 	BEFORE INSERT OR UPDATE ON Musees 
 	FOR EACH ROW
 BEGIN
-	verifChiffre(:new.codePostal);
+	IF (verifChiffre(:new.codePostal)=1) THEN
+		RAISE_APPLICATION_ERROR(-20019, 'presence lettre dans code postal');
+	END IF;
 END;
 /
 
@@ -329,15 +352,19 @@ CREATE OR REPLACE TRIGGER trigVenteCodePostal
 	BEFORE INSERT OR UPDATE ON VendTickets 
 	FOR EACH ROW
 BEGIN
-	verifChiffre(:new.codePostal);
+	IF (verifChiffre(:new.codePostal)=1) THEN
+		RAISE_APPLICATION_ERROR(-20019, 'presence lettre dans code postal');
+	END IF;
 END;
 /
 
-CREATE OR REPLACE TRIGGER trigEmpoyeCodePostal 
+CREATE OR REPLACE TRIGGER trigEmployeCodePostal 
 	BEFORE INSERT OR UPDATE ON Employes 
 	FOR EACH ROW
 BEGIN
-	verifChiffre(:new.codePostal);
+	IF (verifChiffre(:new.codePostal)=1) THEN
+		RAISE_APPLICATION_ERROR(-20019, 'presence lettre dans code postal');
+	END IF;
 END;
 /
 
