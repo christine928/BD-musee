@@ -113,7 +113,7 @@ END;
 --vérifie si la date entrée est la date du jour
 CREATE OR REPLACE PROCEDURE verifDate(newDate date)IS
 BEGIN	
-	IF(newDate >= TRUNC(SYSDATE -1) AND newDate < TRUNC(SYSDATE + 1))THEN --sysdate prend aussi en compte l'heure exacte ce que nous ne voulons pas alors on compare sur la journée entière
+	IF(newDate = TO_DATE(SYSDATE, 'yyyy/mm/dd'))THEN --sysdate prend aussi en compte l'heure exacte ce que nous ne voulons pas alors on compare sur la journée entière
     		RAISE_APPLICATION_ERROR( -20010,'la date ne vaut pas la date actuelle :current date - value = ' || 
           to_char( SYSDATE, 'YYYY-MM-DD' ));
   	END IF;
