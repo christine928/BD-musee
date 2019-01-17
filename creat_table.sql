@@ -285,8 +285,10 @@ BEGIN
 	IF(verifLettre(:new.nom)=1) THEN 
 		RAISE_APPLICATION_ERROR(-20017,'presence chiffre dans nom');
 	END IF;
-	IF (verifLettre(:new.ville)=1) THEN
-		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	IF(:new.ville is not null) then
+		IF (verifLettre(:new.ville)=1) THEN
+			RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+		END IF;
 	END IF;
 END;
 /
@@ -308,11 +310,13 @@ CREATE OR REPLACE TRIGGER trigEmployeNom
 	BEFORE INSERT OR UPDATE ON Employes 
 	FOR EACH ROW
 BEGIN
-	IF(verifLettre(:new.nom)=1) THEN 
-		RAISE_APPLICATION_ERROR(-20017,'presence chiffre dans nom');
-	END IF;
-	IF (verifLettre(:new.ville)=1) THEN
-		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	IF(:new.nom is not null) THEN 
+		IF(verifLettre(:new.nom)=1) THEN 
+			RAISE_APPLICATION_ERROR(-20017,'presence chiffre dans nom');
+		END IF;
+		IF (verifLettre(:new.ville)=1) THEN
+			RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+		 END IF;
 	END IF;
 END;
 /
@@ -321,8 +325,10 @@ CREATE OR REPLACE TRIGGER trigOeuvreNom
 	BEFORE INSERT OR UPDATE ON Oeuvres 
 	FOR EACH ROW
 BEGIN
-	IF (verifLettre(:new.nom)=1) THEN
-		RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+	IF(:new.nom is not null) THEN
+		IF (verifLettre(:new.nom)=1) THEN
+			RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
+		END IF;
 	END IF;
 END;
 /
@@ -426,3 +432,9 @@ BEGIN
 	END IF;
 END;
 /
+
+
+
+
+
+
