@@ -75,7 +75,7 @@ CREATE TABLE Oeuvres (
 	luminositeMax number(6) CONSTRAINT constOeuvreLum CHECK (luminositeMax BETWEEN 150 AND 130000)not null,
 	securite number(2) not null,
 	fragilite number(3) not null,
-	type char(15) CONSTRAINT constOeuvreType CHECK (type IN ('peinture', 'sculpture', 'manuscrit', 'outils', 'autres')),
+	type char(15) CONSTRAINT constOeuvreType CHECK (type IN ('peinture', 'sculpture', 'manuscrit', 'outils', 'bijoux', 'maquette', 'autres')),
 	nom varchar(50),
 	artiste varchar(25),
 	dateCreationDebut date,
@@ -444,8 +444,47 @@ BEGIN
 END;
 /
 
+CREATE SEQUENCE seqIDtarif;
 
+CREATE OR REPLACE TRIGGER trigIDtarifs BEFORE INSERT ON Tarifs
+FOR EACH ROW
+BEGIN 
+	SELECT seqIDtarif.NEXTVAL INTO :new.IDtarif from dual;
+END;
+/
 
+CREATE SEQUENCE seqIDmusee;
 
+CREATE OR REPLACE TRIGGER trigIDmusees BEFORE INSERT ON Musees
+FOR EACH ROW
+BEGIN 
+	SELECT seqIDmusee.NEXTVAL INTO :new.IDmusee from dual;
+END;
+/
 
+CREATE SEQUENCE seqIDvendTicket;
 
+CREATE OR REPLACE TRIGGER trigIDvendTickets BEFORE INSERT ON VendTickets
+FOR EACH ROW
+BEGIN 
+	SELECT seqIDVendTicket.NEXTVAL INTO :new.IDticket from dual;
+END;
+/
+
+CREATE SEQUENCE seqIDemploye;
+
+CREATE OR REPLACE TRIGGER trigIDemployes BEFORE INSERT ON Employes
+FOR EACH ROW
+BEGIN 
+	SELECT seqIDemploye.NEXTVAL INTO :new.IDemploye from dual;
+END;
+/
+
+CREATE SEQUENCE seqIDOeuvre;
+
+CREATE OR REPLACE TRIGGER trigIDOeuvres BEFORE INSERT ON Oeuvres
+FOR EACH ROW
+BEGIN 
+	SELECT seqIDOeuvre.NEXTVAL INTO :new.IDOeuvre from dual;
+END;
+/

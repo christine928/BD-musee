@@ -1,3 +1,13 @@
+drop trigger trigIDOeuvres;
+drop sequence seqIDOeuvre;
+drop trigger trigIDemployes;
+drop sequence seqIDemploye;
+drop trigger trigIDvendTickets;
+drop sequence seqIDvendTicket;
+drop trigger trigIDmusees;
+drop sequence seqIDmusee;
+drop trigger trigIDtarifs;
+drop sequence seqIDtarif;
 drop function fctMuseeActif;
 drop trigger trigEmpruntemuseeActif;
 drop trigger trigEmprunteUneOeuvre;
