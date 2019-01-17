@@ -23,11 +23,11 @@ CREATE TABLE Musees(
 	codePostal varchar(5) not null,
 	ville varchar(25) not null,
 	telephone varchar(10),
-	transport number(2),
-	temperatureMin number(3),
-	temperatureMax number(3),
-	luminositeMax number(6),
-	securite number (2),
+	transport number(2)not null,
+	temperatureMin number(3)not null,
+	temperatureMax number(3)not null,
+	luminositeMax number(6)not null,
+	securite number (2)not null,
 CONSTRAINT checkMuseeTel CHECK ( length(telephone)=10 OR telephone is null),
 CONSTRAINT checkMuseeCodePostal CHECK (length(codePostal)=5),
 CONSTRAINT checkMuseeTransport CHECK (transport BETWEEN 0 AND 20),--note sur 20 en fonctin de critères (...)
@@ -92,7 +92,7 @@ CREATE TABLE Emprunte(
 	IDmusee integer REFERENCES Musees(IDmusee) not null,
 	dateEmprunt date not null,
 	dateRetour date not null,
-	prix number(14, 2) CONSTRAINT constEmpruntePrix CHECK (prix>=0),
+	prix number(14, 2) CONSTRAINT constEmpruntePrix CHECK (prix>=0) not null,
 	CONSTRAINT constEmprunteDate CHECK (DateRetour>DateEmprunt),
 	CONSTRAINT pkemprunte PRIMARY KEY (IDoeuvre, IDmusee, dateEmprunt)
 );
