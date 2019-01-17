@@ -4,15 +4,15 @@ CREATE TABLE Particuliers(
 	adresse varchar(50) not null,
 	codePostal varchar(5) not null,
 	ville varchar(25),
-	telephone varchar(12),
-CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null),
+	telephone varchar(10),
+CONSTRAINT checkPartiTel CHECK (length(telephone)=10 OR telephone is null),
 CONSTRAINT checkPartiCodePostal CHECK (length(codePostal)=5)
 );
 
 CREATE TABLE Tarifs( 
 	IDtarif integer CONSTRAINT pkTarifs PRIMARY KEY,
 	cible varchar(25) not null,
-	prix number(5,2) not null
+	prix number(5,2) not null,
 CONSTRAINT checkPrix CHECK (prix >= 0)
 );
 
@@ -22,13 +22,13 @@ CREATE TABLE Musees(
 	adresse varchar(50) not null,
 	codePostal varchar(5) not null,
 	ville varchar(25) not null,
-	telephone varchar(12),
+	telephone varchar(10),
 	transport number(2),
 	temperatureMin number(3),
 	temperatureMax number(3),
 	luminositeMax number(6),
 	securite number (2),
-CONSTRAINT checkMuseeTel CHECK (length(telephone)=10 OR length(telephone)=12 OR telephone is null),
+CONSTRAINT checkMuseeTel CHECK ( length(telephone)=10 OR telephone is null),
 CONSTRAINT checkMuseeCodePostal CHECK (length(codePostal)=5),
 CONSTRAINT checkMuseeTransport CHECK (transport BETWEEN 0 AND 20),--note sur 20 en fonctin de critères (...)
 CONSTRAINT checkMuseeTempMin CHECK ((temperatureMin < temperatureMax) AND (temperatureMin > 0)),
@@ -132,7 +132,7 @@ END;
 CREATE OR REPLACE FUNCTION verifDate(newDate date)
 RETURN number IS
 BEGIN	
-	IF(newDate = TO_DATE(SYSDATE, 'yyyy/mm/dd'))THEN --sysdate prend aussi en compte l'heure exacte ce que nous ne voulons pas alors on compare sur la journée entière
+	IF(newDate = TO_DATE(SYSDATE, 'DD-MM-YY'))THEN --sysdate prend aussi en compte l'heure exacte ce que nous ne voulons pas alors on compare sur la journée entière
 		RETURN 1;
 
   	END IF;
@@ -150,10 +150,6 @@ BEGIN
 	IF( (len = 10) AND ( 
 	(substr(telephone,1,1) <> '0')OR --garde la partie de chaîne de la position 1 sur une longueur de 1
 	(substr(telephone,2,1) IN ('0','8'))))THEN
-		RETURN 1;
-	ELSIF( (len = 12) AND (
-	(substr(telephone,1,3) <> '+33')OR 
-	(substr(telephone,4,1) IN ('0','8'))))THEN
 		RETURN 1;
 	END IF;
 
@@ -213,9 +209,9 @@ BEGIN
 		RAISE_APPLICATION_ERROR(-20013, 'tu ne peux pas emprunter une oeuvre pour un prix superieur ou egal a sa valeur.');
 	END IF;
 
-	--verification que l emprunt commence aujourd hui, ca se fera avec la fonction de lea;) des qu elle sera ok
-	IF (:new.dateEmprunt != to_date(sysdate, 'DD-MON-YY')) THEN
-		RAISE_APPLICATION_ERROR(-60009, 'Tu ne peux pas prevoir d emprunter une oeuvre. Il faut donc mettre la date d aujourd hui comme date d emprunt');
+	--verification que l emprunt commence aujourd hui
+	IF (verifDate(:new.DateEmprunt)=0) THEN
+		RAISE_APPLICATION_ERROR(-20022, 'Tu ne peux pas prevoir d emprunter une oeuvre. Il faut donc mettre la date d aujourd hui comme date d emprunt');
 	END IF;
 	
 	--verification que le musee ne s emprunte pas a lui meme
@@ -245,7 +241,7 @@ CREATE OR REPLACE TRIGGER trigVenteDate
 BEGIN
 	IF (verifDate(:new.dateVente)=1) then
 		RAISE_APPLICATION_ERROR( -20010,'la date ne vaut pas la date actuelle :current date - value = ' || 
-          to_char( SYSDATE, 'YYYY-MM-DD' ));
+          to_char( SYSDATE, 'DD-MM-YY' ));
 	END IF;
 END;
 /
