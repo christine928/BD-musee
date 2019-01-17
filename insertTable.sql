@@ -46,9 +46,9 @@ INSERT INTO Musees VALUES (21,'Musee des arts ludiques','2 rue Montalembert','75
 INSERT INTO Musees VALUES (22,'Musee d`Orsay','1 rue de la Legion d`Honneur','75007','Paris','0140494814',16,14,37,95000,17);
 
 --vendTickets (IDticket, IDtarif, IDmusee, dateVente, dateVisite, codePostal)
-INSERT INTO VendTickets VALUES (1,2,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('6-fev-19', 'DD-MON-YY'),92500);
-INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('26-fev-19', 'DD-MON-YY'),TO_DATE('16-fev-19', 'DD-MON-YY'),75001);
-INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('01-avr-19', 'DD-MON-YY'),TO_DATE('08-avr-19', 'DD-MON-YY'),92130);
+INSERT INTO VendTickets VALUES (1,2,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('6-feb-19', 'DD-MON-YY'),92500);
+INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('26-feb-19', 'DD-MON-YY'),TO_DATE('16-feb-19', 'DD-MON-YY'),75001);
+INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('01-apr-19', 'DD-MON-YY'),TO_DATE('08-apr-19', 'DD-MON-YY'),92130);
 
 
 --particuliers (IDparticulier, nom, adresse, codePostal, ville, telephone)
