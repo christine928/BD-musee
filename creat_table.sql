@@ -75,7 +75,7 @@ CREATE TABLE Oeuvres (
 	luminositeMax number(6) CONSTRAINT constOeuvreLum CHECK (luminositeMax BETWEEN 150 AND 130000)not null,
 	securite number(2) not null,
 	fragilite number(3) not null,
-	type char(15) CONSTRAINT constOeuvreType CHECK (type IN ('peinture', 'sculpture', 'manuscrit', 'outils', 'autres')),
+	type char(15) CONSTRAINT constOeuvreType CHECK (type IN ('peinture', 'sculpture', 'manuscrit', 'outils', 'bijoux', 'maquette', 'autres')),
 	nom varchar(50),
 	artiste varchar(25),
 	dateCreationDebut date,
