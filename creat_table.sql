@@ -268,6 +268,21 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE TRIGGER trigEmployeTel 
+	BEFORE INSERT OR UPDATE ON Employes 
+	FOR EACH ROW
+DECLARE
+	ok number(1):=0;
+BEGIN
+	SELECT telephone INTO ok
+		FROM musees
+		WHERE musees.IDmusee = :new.IDmusee;
+	IF (ok = 0) THEN
+		RAISE_APPLICATION_ERROR(-20008,'un musee ferme ne peut pas empoyer une personne');
+	END IF;
+END;
+/
+
 --Télephone : Nous avons accepter que l'utilisateur puisse utiliser les deux forme les plus courante pour les numéros de télephone à savoir 0 ou +33  suivi d'un chiffre qui n'est pas 0 ou 8 suivi de 8 chiffre. Nous avons aussi décider que dans la table tous les numéros de téléphone seraient de la forme 0185479631.
 --Ils faut donc utiliser le type varchar de taille 10 ou 12 (ALTER TABLE). Pour le reste des constraintes on va utiliser un trigger. Il faut vérifier que le numéro commence soit pas +33 ou par 0 puis qu'il n'est pas suivi de 0 ou 8 et enfin qu'il n'y ait pas de lettre parmi les 10 digits.
 
@@ -375,7 +390,7 @@ CREATE OR REPLACE TRIGGER trigTransport
 	BEFORE INSERT OR UPDATE ON Emprunte 
 	FOR EACH ROW
 DECLARE
-	ok integer := 0;
+	ok number(1):=0;
 BEGIN
 	SELECT count(*) INTO ok
 		FROM Musees, Oeuvres
@@ -383,8 +398,8 @@ BEGIN
 			AND Oeuvres.IDoeuvre = :new.IDoeuvre
 			AND Oeuvres.luminositeMax <= Musees.luminositeMax
 			AND Oeuvres.securite <= Musees.securite
-			AND Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax
-			OR Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax;
+			AND (Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax
+			OR Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax);
 	IF (ok = 0) THEN
 		RAISE_APPLICATION_ERROR(-20004, 'les conditions de stockage ou de transport de l oeuvre pour ce musee ne sont pas compatibles');
 	END IF;

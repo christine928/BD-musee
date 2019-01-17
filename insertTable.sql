@@ -46,13 +46,14 @@ INSERT INTO Musees VALUES (0,'Musee des arts ludiques','2 rue Montalembert','750
 INSERT INTO Musees VALUES (0,'Musee d`Orsay','1 rue de la Legion d`Honneur','75007','Paris','0140494814',16,14,37,95000,17);
 
 --vendTickets (IDticket, IDtarif, IDmusee, dateVente, dateVisite, codePostal)
-INSERT INTO VendTickets VALUES (0,2,1,TO_DATE('26-jan-19', 'DD-MM-YY'),TO_DATE('6-02-19', 'DD-MM-YY'),92500);
-INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('26-fev-19', 'DD-MM-YY'),TO_DATE('16-02-19', 'DD-MM-YY'),75001);
-INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('01-avr-19', 'DD-MM-YY'),TO_DATE('08-03-19', 'DD-MM-YY'),92130);
+INSERT INTO VendTickets VALUES (1,2,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('6-feb-19', 'DD-MON-YY'),92500);
+INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('26-feb-19', 'DD-MON-YY'),TO_DATE('16-feb-19', 'DD-MON-YY'),75001);
+INSERT INTO VendTickets VALUES (2,1,1,TO_DATE('01-apr-19', 'DD-MON-YY'),TO_DATE('08-apr-19', 'DD-MON-YY'),92130);
 
 
 --oeuvres (IDoeuvre, IDappartient,source, poids, unitePoids,largeur, longueur,	hauteur, temperatureMin, temperatureMax, luminositeMax, securite, fragilite, type, nom, 	artiste, dateCreation, theme, mouvement, valeur)
 INSERT INTO oeuvres VALUES (0, 1, 1, 15, 'kg', 0.53, 0.03 , 0,77, 17, 21, 150, 15, 13, 'peinture', 'La Joconde', 'Leonard de Vinci', to_date('01-01-1503', 'DD-MM-YYYY'), to_date('31-12-1519', 'DD-MM-YY'), 'Portrait', 'Haute Renaissance', -1);
+
 
 --emprunte (IDoeuvre, IDmusee, dateEmprunt, dateRetour, prix)
 --INSERT INTO emprunte VALUES (4,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('2019/02/16','yyyy/mm/dd'),500);
