@@ -5,8 +5,8 @@ FIELDS TERMINATED BY ";" OPTIONALLY ENCLOSED BY '"'
 (  	IDticket,
 	IDtarif,
 	IDmusee,
-	dateVente,
-	dateVisite,	
+	dateVente DATE 'DD-MM-YYYY',
+	dateVisite DATE 'DD-MM-YYYY',	
 	codePostal
 )
 
@@ -32,4 +32,3 @@ BEGINDATA
 0;12;1;01-08-2019;21-08-2019;"75011"
 0;3;22;11-08-2019;11-08-2019;"64500"
 0;1;11;15-08-2019;15-08-2019;"46800"
-

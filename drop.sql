@@ -21,7 +21,6 @@ drop function verifDate;
 drop trigger trigPartiNom;
 drop trigger trigMuseeNom;
 drop trigger trigEmployeNom;
-drop trigger trigOeuvreNom;
 drop trigger trigOeuvreAppartient;
 drop trigger trigPartiCodePostal;
 drop trigger trigMuseeCodePostal;

@@ -65,22 +65,22 @@ CREATE TABLE Oeuvres (
 	IDoeuvre integer CONSTRAINT pkOeuvre PRIMARY KEY not null,
 	IDappartient integer not null,
 	source number(1) CONSTRAINT constOeuvreBoolean CHECK (source in (0, 1)) not null, -- 0 pour les particuliers et 1 pour les musées
-	poids number(5,2) CONSTRAINT constOeuvrePoids CHECK (poids >=0)not null, 
+	poids number(6,3) CONSTRAINT constOeuvrePoids CHECK (poids >0)not null, 
 	unitePoids varchar(2) CONSTRAINT constOeuvreUnitePoids CHECK (unitePoids in ('t', 'kg', 'g', 'mg'))not null,
-	largeur number(5,2) CONSTRAINT constOeuvrelarg CHECK (largeur>0)not null,
-	longueur number(5,2) CONSTRAINT constOeuvrelong CHECK (longueur>0)not null, 
-	hauteur number(5,2) CONSTRAINT constOeuvrehaut CHECK (hauteur>0) not null, 
-	temperatureMin number(3) CONSTRAINT constOeuvreTempMin CHECK (temperatureMin>0)not null,
+	largeur number(6,3) CONSTRAINT constOeuvrelarg CHECK (largeur>0)not null,
+	longueur number(6,3) CONSTRAINT constOeuvrelong CHECK (longueur>0)not null, 
+	hauteur number(6,3) CONSTRAINT constOeuvrehaut CHECK (hauteur>0) not null, 
+	temperatureMin number(3) CONSTRAINT constOeuvreTempMin CHECK (temperatureMin>-15)not null,
 	temperatureMax number(3) CONSTRAINT constOeuvreTempMax CHECK (temperatureMax<40) not null,
 	luminositeMax number(6) CONSTRAINT constOeuvreLum CHECK (luminositeMax BETWEEN 150 AND 130000)not null,
 	securite number(2) not null,
 	fragilite number(3) not null,
 	type char(15) CONSTRAINT constOeuvreType CHECK (type IN ('peinture', 'sculpture', 'manuscrit', 'outils', 'bijoux', 'maquette', 'autres')),
 	nom varchar(50),
-	artiste varchar(25),
+	artiste varchar(40),
 	dateCreationDebut date,
 	dateCreationFin date,
-	theme varchar(20),
+	theme varchar(50),
 	mouvement varchar(20),
 	valeur float CONSTRAINT constOeuvrePrix CHECK (valeur=-1 OR valeur>0) not null,-- vaut -1 si inestimable
 CONSTRAINT constOeuvretempMaxSuppMin CHECK (temperatureMax>temperatureMin),
@@ -332,18 +332,6 @@ BEGIN
 END;
 /
 
-CREATE OR REPLACE TRIGGER trigOeuvreNom 
-	BEFORE INSERT OR UPDATE ON Oeuvres 
-	FOR EACH ROW
-BEGIN
-	IF(:new.nom is not null) THEN
-		IF (verifLettre(:new.nom)=1) THEN
-			RAISE_APPLICATION_ERROR(-20018,'presence chiffre dans ville');
-		END IF;
-	END IF;
-END;
-/
-
 -- contrainte sur le code postal
 CREATE OR REPLACE TRIGGER trigPartiCodePostal 
 	BEFORE INSERT OR UPDATE ON Particuliers 
@@ -390,7 +378,7 @@ CREATE OR REPLACE TRIGGER trigTransport
 	BEFORE INSERT OR UPDATE ON Emprunte 
 	FOR EACH ROW
 DECLARE
-	ok number:=0;
+	ok number:=10;
 BEGIN
 	SELECT count(*) INTO ok
 		FROM Musees, Oeuvres
