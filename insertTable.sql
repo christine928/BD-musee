@@ -58,4 +58,8 @@ INSERT INTO oeuvres VALUES (0, 1, 1, 15, 'kg', 0.53, 0.03 , 0.77, 17, 21, 50000,
 INSERT INTO employes VALUES(0,1,null,'Conservateur',11000,'Arzal','5 rue d Uzes','75002','Paris');
 
 --emprunte (IDoeuvre, IDmusee, dateEmprunt, dateRetour, prix)
---INSERT INTO emprunte VALUES (4,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('2019/02/16','yyyy/mm/dd'),500);
+insert into emprunte values (4,21,to_date('18-01-2019', 'DD-MM-YYYY'), to_date('19-01-2019', 'DD-MM-YYYY'),20);
+insert into emprunte values (7,15,to_date('18-01-2019', 'DD-MM-YYYY'),to_date('20-01-2019', 'DD-MM-YYYY'),20);
+insert into emprunte values (9,1,to_date('18-01-2019', 'DD-MM-YYYY'),to_date('18-09-2019', 'DD-MM-YYYY'),300);
+insert into emprunte values (18,4,to_date('18-01-2019', 'DD-MM-YYYY'),to_date('18-01-2020', 'DD-MM-YYYY'),24000);
+insert into emprunte values (6,1,to_date('18-01-2019', 'DD-MM-YYYY'),to_date('18-09-2019', 'DD-MM-YYYY'),1);
