@@ -34,7 +34,7 @@ INSERT INTO Musees VALUES (0,'Musee Colette','Rue du chateau','89520','St-Sauveu
 INSERT INTO Musees VALUES (0,'Port-Musee','Place de l`Enfer','29100','Douarnenez','0298926520',15,4,25,75000,15);
 INSERT INTO Musees VALUES (0,'Musee bigouden','Square de l`Europe','29120','Pont-l`Abbe','0298660903',11,2,39,99000,13);
 INSERT INTO Musees VALUES (0,'Musee ornitologique','Rue des Noyers','85310','La-Chaize-le-Vicomte','0251057021',17,21,27,85000,17);
-INSERT INTO Musees VALUES (0,'Musee du campagnonnage','1 square Prosper Merimee','37000','Tours','02472116220',10,10,35,105000,11);
+INSERT INTO Musees VALUES (0,'Musee du campagnonnage','1 square Prosper Merimee','37000','Tours','0247211622',10,10,35,105000,11);
 INSERT INTO Musees VALUES (0,'Maison de la magie','1 Pace du Chateau','41000','Blois','0254903333',15,12,30,89000,15);
 INSERT INTO Musees VALUES (0,'Musee de la coutellerie','17 avenue du General de Gaulle','52800','Nogent','0325876767',12,16,35,75000,12);
 INSERT INTO Musees VALUES (0,'Musee de l`homme','17 place du Trocadero','75116','Paris','0144057272',12,16,35,75000,12);
