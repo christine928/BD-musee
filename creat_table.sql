@@ -409,7 +409,6 @@ END;
 CREATE OR REPLACE TRIGGER  trigOeuvreAppartient BEFORE INSERT OR UPDATE ON oeuvres
 FOR EACH ROW
 DECLARE
-	ok number(1):=0; --vaut 1 si on doit lever une exception due au musee, 2 pour une exception due au particulier, 0 sinon
 	nbreParticulier integer:=0;
 	nbreMusee integer:=0;
 BEGIN
@@ -422,16 +421,11 @@ BEGIN
 		WHERE IdMusee = :new.Idappartient;
 		
 	IF((:new.source=0) AND (nbreParticulier=0)) THEN
-		ok:=2;
+		RAISE_APPLICATION_ERROR(-20005, 'cet identifiant de particulier n existe pas');
 	ELSIF((:new.source=1) AND (nbreMusee=0)) THEN
-		ok:=1;
+		RAISE_APPLICATION_ERROR(-20006, 'cet identifiant de musee n existe pas');
 	END IF;
 
-	IF(ok=1) THEN
-		RAISE_APPLICATION_ERROR(-20005, 'cet identifiant de musee n existe pas');
-	ELSIF(ok=2) THEN 
-		RAISE_APPLICATION_ERROR(-20006, 'cet identifiant de particulier n existe pas');
-	END IF;
 END;
 / 
 
