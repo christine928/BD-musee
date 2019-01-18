@@ -384,7 +384,6 @@ BEGIN
 		FROM Musees, Oeuvres
 		WHERE Musees.IDmusee = :new.IDmusee
 			AND Oeuvres.IDoeuvre = :new.IDoeuvre
-			AND Oeuvres.luminositeMax <= Musees.luminositeMax
 			AND Oeuvres.securite <= Musees.securite
 			AND (Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax
 			OR Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax);
