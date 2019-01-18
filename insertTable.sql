@@ -55,5 +55,7 @@ INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('01-apr-19', 'DD-MON-YY'),TO_DATE(
 INSERT INTO oeuvres VALUES (0, 1, 1, 15, 'kg', 0.53, 0.03 , 0.77, 17, 21, 50000, 15, 13, 'peinture', 'La Joconde', 'Leonard de Vinci', to_date('01-01-1503', 'DD-MM-YYYY'), to_date('31-12-1519', 'DD-MM-YY'), 'Portrait', 'Haute Renaissance', -1);
 
 
+INSERT INTO employes VALUES(0,1,null,'Conservateur',11000,'Arzal','5 rue d Uzes','75002','Paris');
+
 --emprunte (IDoeuvre, IDmusee, dateEmprunt, dateRetour, prix)
 --INSERT INTO emprunte VALUES (4,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('2019/02/16','yyyy/mm/dd'),500);

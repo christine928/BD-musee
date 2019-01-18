@@ -52,7 +52,7 @@ CREATE TABLE Employes (
 	IDemploye integer CONSTRAINT pkEmployes PRIMARY KEY, 
 	IDmusee integer CONSTRAINT fkMusees2 REFERENCES Musees(IDmusee) not null, 
 	IDchef integer CONSTRAINT fkEmployes REFERENCES Employes(IDemploye),
-	fonction varchar(20) not null,
+	fonction varchar(50) not null,
 	salaire float not null,
 	nom varchar(25),
 	adresse varchar(50) not null,
@@ -272,7 +272,7 @@ CREATE OR REPLACE TRIGGER trigEmployeTel
 	BEFORE INSERT OR UPDATE ON Employes 
 	FOR EACH ROW
 DECLARE
-	ok number(1):=0;
+	ok number:=0;
 BEGIN
 	SELECT telephone INTO ok
 		FROM musees
@@ -390,7 +390,7 @@ CREATE OR REPLACE TRIGGER trigTransport
 	BEFORE INSERT OR UPDATE ON Emprunte 
 	FOR EACH ROW
 DECLARE
-	ok number(1):=0;
+	ok number:=0;
 BEGIN
 	SELECT count(*) INTO ok
 		FROM Musees, Oeuvres
