@@ -395,8 +395,8 @@ BEGIN
 		WHERE Musees.IDmusee = :new.IDmusee
 			AND Oeuvres.IDoeuvre = :new.IDoeuvre
 			AND Oeuvres.securite <= Musees.securite
-			AND (Oeuvres.temperatureMin BETWEEN Musees.temperatureMin AND Musees.temperatureMax
-			OR Oeuvres.temperatureMax BETWEEN Musees.temperatureMin AND Musees.temperatureMax);
+			AND Oeuvres.temperatureMin <=Musees.temperatureMax
+			AND Oeuvres.temperatureMax >=Musees.temperatureMin;
 	IF (ok = 0) THEN
 		RAISE_APPLICATION_ERROR(-20004, 'les conditions de stockage ou de transport de l oeuvre pour ce musee ne sont pas compatibles');
 	END IF;
