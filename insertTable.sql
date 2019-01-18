@@ -47,7 +47,7 @@ INSERT INTO Musees VALUES (0,'Musee d`Orsay','1 rue de la Legion d`Honneur','750
 
 --vendTickets (IDticket, IDtarif, IDmusee, dateVente, dateVisite, codePostal)
 INSERT INTO VendTickets VALUES (0,2,1,TO_DATE('26-jan-19', 'DD-MON-YY'),TO_DATE('6-feb-19', 'DD-MON-YY'),92500);
-INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('26-feb-19', 'DD-MON-YY'),TO_DATE('16-feb-19', 'DD-MON-YY'),75001);
+INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('26-feb-19', 'DD-MON-YY'),TO_DATE('16-apr-19', 'DD-MON-YY'),75001);
 INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('01-apr-19', 'DD-MON-YY'),TO_DATE('08-apr-19', 'DD-MON-YY'),92130);
 
 
