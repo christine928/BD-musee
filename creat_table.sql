@@ -272,7 +272,7 @@ CREATE OR REPLACE TRIGGER trigEmployeTel
 	BEFORE INSERT OR UPDATE ON Employes 
 	FOR EACH ROW
 DECLARE
-	ok number:=0;
+	ok number:= 0;
 BEGIN
 	SELECT telephone INTO ok
 		FROM musees
@@ -369,6 +369,16 @@ CREATE OR REPLACE TRIGGER trigEmployeCodePostal
 BEGIN
 	IF (verifChiffre(:new.codePostal)=1) THEN
 		RAISE_APPLICATION_ERROR(-20019, 'presence lettre dans code postal');
+	END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trigConservateur 
+	BEFORE INSERT OR UPDATE ON Employes 
+	FOR EACH ROW
+BEGIN
+	IF ((:new.IDchef IS NULL AND :new.fonction != 'conservateur') OR (:new.fonction = 'conservateur' AND :new.IDchef IS NOT NULL)) THEN
+		RAISE_APPLICATION_ERROR(-20020, 'le conservateur n`a pas de chef');
 	END IF;
 END;
 /
