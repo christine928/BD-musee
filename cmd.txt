@@ -1,0 +1,1 @@
+sqlldr userid=etudiant/etudiant control=loadParticuliers.ctl log=logPart.txt
