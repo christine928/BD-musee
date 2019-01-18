@@ -27,7 +27,7 @@ FIELDS TERMINATED BY ";" OPTIONALLY ENCLOSED BY '"'
 )
 
 BEGINDATA
-0;2;1;150;"kg";1.50;2.25;4;5;30;130000;5;15;"sculpture;mausolee familial pour les valerius rufus";;01-01-0001;01-01-0101;"tombe";;300
+0;2;1;150;"kg";1.50;2.25;4;5;30;130000;5;15;"sculpture";"mausolee familial pour les valerius rufus";;01-01-0001;01-01-0101;"tombe";;300
 0;3;1;10;"g";0.03;0.10;0.05;10;27;110000;3;12;"autres";"pipe";;22-07-1923;22-07-1923;;;100
 0;4;1;500;"kg";0.4;0.4;3;0;30;100000;2;2;"sculpture";"colonne romane";;01-01-1118;01-01-1125;"floral";"roman";200
 0;5;1;50;"g";0.01;0.1;0.2;0;30;100000;9;7;"autres";;;01-01-1900;01-01-2000;;;40
