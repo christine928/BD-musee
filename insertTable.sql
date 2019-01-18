@@ -52,7 +52,7 @@ INSERT INTO VendTickets VALUES (0,1,1,TO_DATE('01-apr-19', 'DD-MON-YY'),TO_DATE(
 
 
 --oeuvres (IDoeuvre, IDappartient,source, poids, unitePoids,largeur, longueur,	hauteur, temperatureMin, temperatureMax, luminositeMax, securite, fragilite, type, nom, 	artiste, dateCreation, theme, mouvement, valeur)
-INSERT INTO oeuvres VALUES (0, 1, 1, 15, 'kg', 0.53, 0.03 , 0,77, 17, 21, 150, 15, 13, 'peinture', 'La Joconde', 'Leonard de Vinci', to_date('01-01-1503', 'DD-MM-YYYY'), to_date('31-12-1519', 'DD-MM-YY'), 'Portrait', 'Haute Renaissance', -1);
+INSERT INTO oeuvres VALUES (0, 1, 1, 15, 'kg', 0.53, 0.03 , 0.77, 17, 21, 150, 15, 13, 'peinture', 'La Joconde', 'Leonard de Vinci', to_date('01-01-1503', 'DD-MM-YYYY'), to_date('31-12-1519', 'DD-MM-YY'), 'Portrait', 'Haute Renaissance', -1);
 
 
 --emprunte (IDoeuvre, IDmusee, dateEmprunt, dateRetour, prix)
